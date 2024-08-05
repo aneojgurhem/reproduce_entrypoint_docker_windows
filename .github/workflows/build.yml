@@ -1,0 +1,28 @@
+name: Build
+
+on:
+    push:
+
+jobs:
+    windows:
+        runs-on: windows-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                img:
+                    - mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-ltsc2022
+                    - mcr.microsoft.com/dotnet/aspnet:8.0-windowsservercore-ltsc2022
+                    - mcr.microsoft.com/windows/servercore:ltsc2022
+                    - mcr.microsoft.com/windows/nanoserver:ltsc2022
+        steps:
+            - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+            - run: docker build --build-arg IMAGE=${{ matrix.img }} -f windows/Dockerfile -t windows .
+            - run: docker inspect windows
+            - run: docker inspect windows | jq .[].Config.Entrypoint
+    ubuntu:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+            - run: docker build -f ubuntu/Dockerfile -t ubuntu .
+            - run: docker inspect ubuntu
+            - run: docker inspect ubuntu | jq .[].Config.Entrypoint
